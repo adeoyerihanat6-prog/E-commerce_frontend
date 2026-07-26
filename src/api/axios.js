@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 const API = axios.create({
-  baseURL: 'https://e-commerce-fxon.onrender.com',
+  baseURL: 'https://e-commerce-fxon.onrender.com/api', // Added /api here
 });
 
 // Attach JWT token to requests if available
@@ -13,5 +13,4 @@ API.interceptors.request.use((config) => {
   return config;
 });
 
-// CRITICAL: Make sure this export default statement is at the bottom!
 export default API;
