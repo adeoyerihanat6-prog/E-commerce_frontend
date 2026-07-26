@@ -1,0 +1,6 @@
+@import "tailwindcss";
+
+fontFamily: {
+  heading: ["Sora"],
+  body: ["Inter"],
+}
