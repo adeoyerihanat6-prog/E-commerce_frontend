@@ -1,5 +1,5 @@
 
-# 🛍️ Velora — Modern E-commerce Platform
+# Velora — Modern E-commerce Platform
 
 ![Velora Preview](./screenshots/banner.png)
 
@@ -206,21 +206,22 @@ git push origin feature/NewFeature
 
 ---
 
-👩🏽‍💻 Author
+# 👩🏽‍💻 Author
 
-Rihanat Eniola 
+## Rihanat Eniola 
 
 Full Stack Developer passionate about building modern web applications.
 
-Connect With Me
+### Connect With Me
 
-GitHub: https://github.com/adeoyerihanat6-prog
+- GitHub: [adeoyerihanat6-prog](https://github.com/adeoyerihanat6-prog)
+- Portfolio: [Rihanat's Portfolio](https://portfolio-bay-eight-73.vercel.app)
+- LinkedIn: [Rihannah Adeoye](https://www.linkedin.com/in/rihanat-adeoye?utm_source=share_via&utm_content=profile&utm_medium=member_android)
+- Twitter/X: [@riha66076](https://x.com/riha66076)
 
-Portfolio: https://portfolio-bay-eight-73.vercel.app
+---
 
-LinkedIn: https://www.linkedin.com/in/rihanat-adeoye
-
-
+⭐ If you found this project interesting, consider giving it a star!
 ---
 
 ⭐ Support
