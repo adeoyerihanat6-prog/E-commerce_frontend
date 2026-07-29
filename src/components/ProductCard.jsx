@@ -87,8 +87,8 @@ export default function ProductCard({
 
         {/* Quick View Hover Overlay */}
         <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
-          <span className="inline-flex items-center gap-2 rounded-xl bg-white/10 px-4 py-2 text-xs font-semibold text-white backdrop-blur-md border border-white/20 shadow-lg">
-            <Eye size={14} /> Quick View
+          <span className="inline-flex items-center gap-2 rounded-xl bg-white/10 px-4 py-2 text-xs font-semibold text-white backdrop-blur-md border border-white/20 shadow-lg transition-opacity duration-200 opacity-100 md:opacity-0 md:group-hover:opacity-100">
+              <Eye size={14} /> Quick View
           </span>
         </div>
       </div>

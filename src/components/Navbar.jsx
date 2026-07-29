@@ -9,10 +9,13 @@ import {
   Menu,
   X,
   ChevronRight,
+  ChevronDown,
 } from "lucide-react";
 
 export default function Navbar({ cartCount = 0, onOpenCart }) {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [dropdownOpen, setDropdownOpen] = useState(false);
+  const [mobileCollectionsOpen, setMobileCollectionsOpen] = useState(false);
   const navigate = useNavigate();
 
   const token = localStorage.getItem("token");
@@ -22,6 +25,14 @@ export default function Navbar({ cartCount = 0, onOpenCart }) {
 
   const isAdmin = user?.role === "Admin";
 
+  const collections = [
+    { name: "Electronics", category: "Electronics" },
+    { name: "Fashion Essentials", category: "Fashion" },
+    { name: "Home & Living", category: "Home & Living" },
+    { name: "Accessories", category: "Accessories" },
+    { name: "Beauty & Personal", category: "Beauty" },
+  ];
+
   const handleLogout = () => {
     localStorage.removeItem("token");
     localStorage.removeItem("user");
@@ -29,7 +40,16 @@ export default function Navbar({ cartCount = 0, onOpenCart }) {
     navigate("/login");
   };
 
-  const closeMobileMenu = () => setIsMobileMenuOpen(false);
+  const closeMobileMenu = () => {
+    setIsMobileMenuOpen(false);
+    setMobileCollectionsOpen(false);
+  };
+
+  const handleCollectionSelect = (category) => {
+    setDropdownOpen(false);
+    closeMobileMenu();
+    navigate(`/shop?category=${encodeURIComponent(category)}`);
+  };
 
   // Nav link style helper
   const navLinkStyle = ({ isActive }) =>
@@ -63,10 +83,65 @@ export default function Navbar({ cartCount = 0, onOpenCart }) {
 
             {/* Desktop Nav Links */}
             <div className="hidden md:flex items-center gap-8 text-sm font-medium">
-              <NavLink to="/" className={({ isActive }) => isActive ? "text-violet-400 font-semibold" : "text-zinc-300 hover:text-white transition"}>Home</NavLink>
-              <NavLink to="/shop" className={({ isActive }) => isActive ? "text-violet-400 font-semibold" : "text-zinc-300 hover:text-white transition"}>Shop</NavLink>
-              <NavLink to="/collections" className={({ isActive }) => isActive ? "text-violet-400 font-semibold" : "text-zinc-300 hover:text-white transition"}>Collections</NavLink>
-              <NavLink to="/about" className={({ isActive }) => isActive ? "text-violet-400 font-semibold" : "text-zinc-300 hover:text-white transition"}>About</NavLink>
+              <NavLink 
+                to="/" 
+                className={({ isActive }) => 
+                  isActive ? "text-violet-400 font-semibold" : "text-zinc-300 hover:text-white transition"
+                }
+              >
+                Home
+              </NavLink>
+
+              <NavLink 
+                to="/shop" 
+                className={({ isActive }) => 
+                  isActive ? "text-violet-400 font-semibold" : "text-zinc-300 hover:text-white transition"
+                }
+              >
+                Shop
+              </NavLink>
+
+              {/* COLLECTIONS DROPDOWN (DESKTOP) */}
+              <div 
+                className="relative"
+                onMouseEnter={() => setDropdownOpen(true)}
+                onMouseLeave={() => setDropdownOpen(false)}
+              >
+                <button 
+                  className="flex items-center gap-1.5 text-zinc-300 hover:text-white py-2 transition"
+                >
+                  Collections
+                  <ChevronDown 
+                    size={16} 
+                    className={`transition-transform duration-200 ${dropdownOpen ? 'rotate-180 text-violet-400' : ''}`} 
+                  />
+                </button>
+
+                {dropdownOpen && (
+                  <div className="absolute top-full left-1/2 -translate-x-1/2 w-52 pt-2 z-50">
+                    <div className="bg-zinc-900 border border-white/10 rounded-2xl p-2 shadow-2xl backdrop-blur-2xl">
+                      {collections.map((item) => (
+                        <button
+                          key={item.name}
+                          onClick={() => handleCollectionSelect(item.category)}
+                          className="w-full text-left px-3.5 py-2.5 text-xs font-medium text-zinc-400 hover:text-white hover:bg-violet-600/20 hover:border-violet-500/30 rounded-xl transition-all"
+                        >
+                          {item.name}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              <NavLink 
+                to="/about" 
+                className={({ isActive }) => 
+                  isActive ? "text-violet-400 font-semibold" : "text-zinc-300 hover:text-white transition"
+                }
+              >
+                About
+              </NavLink>
             </div>
 
             {/* Right Side Controls */}
@@ -175,7 +250,7 @@ export default function Navbar({ cartCount = 0, onOpenCart }) {
           isMobileMenuOpen ? "translate-x-0" : "translate-x-full"
         }`}
       >
-        <div>
+        <div className="overflow-y-auto">
           {/* Side Drawer Header */}
           <div className="flex items-center justify-between pb-6 border-b border-white/10">
             <div className="flex items-center gap-2.5">
@@ -215,14 +290,42 @@ export default function Navbar({ cartCount = 0, onOpenCart }) {
               <span>Home</span>
               <ChevronRight size={16} className="text-zinc-500" />
             </NavLink>
+
             <NavLink to="/shop" onClick={closeMobileMenu} className={navLinkStyle}>
               <span>Shop</span>
               <ChevronRight size={16} className="text-zinc-500" />
             </NavLink>
-            <NavLink to="/collections" onClick={closeMobileMenu} className={navLinkStyle}>
-              <span>Collections</span>
-              <ChevronRight size={16} className="text-zinc-500" />
-            </NavLink>
+
+            {/* Mobile Expandable Collections Item */}
+            <div>
+              <button
+                onClick={() => setMobileCollectionsOpen(!mobileCollectionsOpen)}
+                className="w-full flex items-center justify-between py-2.5 px-3 rounded-xl text-zinc-300 hover:text-white hover:bg-white/5 transition-all"
+              >
+                <span>Collections</span>
+                <ChevronDown
+                  size={16}
+                  className={`text-zinc-500 transition-transform ${
+                    mobileCollectionsOpen ? "rotate-180 text-violet-400" : ""
+                  }`}
+                />
+              </button>
+
+              {mobileCollectionsOpen && (
+                <div className="ml-4 mt-1 pl-3 border-l border-white/10 flex flex-col gap-1">
+                  {collections.map((item) => (
+                    <button
+                      key={item.name}
+                      onClick={() => handleCollectionSelect(item.category)}
+                      className="text-left py-2 px-3 text-xs text-zinc-400 hover:text-white hover:bg-white/5 rounded-lg transition"
+                    >
+                      {item.name}
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+
             <NavLink to="/about" onClick={closeMobileMenu} className={navLinkStyle}>
               <span>About</span>
               <ChevronRight size={16} className="text-zinc-500" />
@@ -264,7 +367,7 @@ export default function Navbar({ cartCount = 0, onOpenCart }) {
         </div>
 
         {/* Footer Actions / Sign In / Logout */}
-        <div className="pt-6 border-t border-white/10">
+        <div className="pt-6 border-t border-white/10 mt-auto">
           {token ? (
             <button
               onClick={handleLogout}

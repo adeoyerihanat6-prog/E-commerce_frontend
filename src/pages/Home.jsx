@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import API from '../api/axios';
 import ProductCard from '../components/ProductCard';
 import { motion } from "framer-motion";
-import { Search, Sparkles, ShieldCheck, Truck, Star } from "lucide-react";
+import { Search, Sparkles, ShieldCheck, Truck, Star, ChevronLeft, ChevronRight, X } from "lucide-react";
 import { Link } from "react-router-dom";
 import toast from "react-hot-toast";
 
@@ -14,6 +14,10 @@ export default function Home({ onAddToCart }) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [email, setEmail] = useState("");
+
+  // Pagination State
+  const [currentPage, setCurrentPage] = useState(1);
+  const productsPerPage = 8; // Adjust max products per page as needed
 
   const categories = [
     "All",
@@ -35,8 +39,8 @@ export default function Home({ onAddToCart }) {
   const fetchProducts = async () => {
     try {
       const response = await API.get('/products');
-      setProducts(response.data);
-      setFilteredProducts(response.data);
+      setProducts(response.data || []);
+      setFilteredProducts(response.data || []);
     } catch (err) {
       console.error('Failed to fetch products:', err);
       setError('Unable to load products right now.');
@@ -49,24 +53,29 @@ export default function Home({ onAddToCart }) {
     fetchProducts();
   }, []);
 
-  // Filter products when search or category changes
+  // Filter products when search query or selected category updates
   useEffect(() => {
-    let updated = products;
+    let updated = [...products];
 
+    // Filter by category
     if (selectedCategory !== 'All') {
       updated = updated.filter(
-        (p) => p.category?.toLowerCase() === selectedCategory.toLowerCase()
+        (p) => p.category?.trim().toLowerCase() === selectedCategory.trim().toLowerCase()
       );
     }
 
+    // Filter by search query (safe check for missing properties)
     if (searchQuery.trim() !== '') {
-      updated = updated.filter((p) =>
-        p.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        p.description?.toLowerCase().includes(searchQuery.toLowerCase())
-      );
+      const query = searchQuery.toLowerCase().trim();
+      updated = updated.filter((p) => {
+        const nameMatches = p.name ? p.name.toLowerCase().includes(query) : false;
+        const descMatches = p.description ? p.description.toLowerCase().includes(query) : false;
+        return nameMatches || descMatches;
+      });
     }
 
     setFilteredProducts(updated);
+    setCurrentPage(1); // Reset back to page 1 whenever search/category changes
   }, [searchQuery, selectedCategory, products]);
 
   // Handle Admin Delete Action
@@ -86,7 +95,6 @@ export default function Home({ onAddToCart }) {
     e.preventDefault();
     if (!email) return;
 
-    // Trigger toast notification
     toast.success("Welcome to the community! 🎉 Check your email soon.", {
       duration: 4000,
       style: {
@@ -105,7 +113,33 @@ export default function Home({ onAddToCart }) {
 
   const handleCategoryClick = (category) => {
     setSelectedCategory(category);
-    // Smooth scroll down to catalog section
+    const catalogSection = document.getElementById("catalog");
+    if (catalogSection) {
+      catalogSection.scrollIntoView({ behavior: "smooth" });
+    }
+  };
+
+  // Mobile/Enter submission handler
+  const handleSearchSubmit = (e) => {
+    e.preventDefault();
+    // Dismiss mobile soft keyboard
+    document.activeElement?.blur();
+
+    // Scroll to results section
+    const catalogSection = document.getElementById("catalog");
+    if (catalogSection) {
+      catalogSection.scrollIntoView({ behavior: "smooth" });
+    }
+  };
+
+  // Pagination Logic
+  const indexOfLastProduct = currentPage * productsPerPage;
+  const indexOfFirstProduct = indexOfLastProduct - productsPerPage;
+  const currentProducts = filteredProducts.slice(indexOfFirstProduct, indexOfLastProduct);
+  const totalPages = Math.ceil(filteredProducts.length / productsPerPage);
+
+  const handlePageChange = (pageNumber) => {
+    setCurrentPage(pageNumber);
     const catalogSection = document.getElementById("catalog");
     if (catalogSection) {
       catalogSection.scrollIntoView({ behavior: "smooth" });
@@ -148,20 +182,33 @@ export default function Home({ onAddToCart }) {
               love in one beautiful shopping experience.
             </p>
 
-            {/* Search Input */}
-            <div className="relative mt-10 max-w-xl">
+            {/* Mobile-Optimized Search Input */}
+            <form onSubmit={handleSearchSubmit} className="relative mt-10 max-w-xl">
               <Search
                 size={20}
-                className="absolute left-5 top-1/2 -translate-y-1/2 text-zinc-500"
+                className="absolute left-5 top-1/2 -translate-y-1/2 text-zinc-500 pointer-events-none"
               />
 
               <input
+                type="text"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 placeholder="Search products..."
-                className="w-full rounded-2xl border border-white/10 bg-zinc-900/70 backdrop-blur-xl pl-14 pr-5 py-4 outline-none focus:border-violet-500 transition text-white placeholder:text-zinc-500"
+                enterKeyHint="search"
+                className="w-full rounded-2xl border border-white/10 bg-zinc-900/70 backdrop-blur-xl pl-14 pr-12 py-4 outline-none focus:border-violet-500 transition text-white placeholder:text-zinc-500"
               />
-            </div>
+
+              {/* Clear button when typing */}
+              {searchQuery && (
+                <button
+                  type="button"
+                  onClick={() => setSearchQuery('')}
+                  className="absolute right-4 top-1/2 -translate-y-1/2 text-zinc-400 hover:text-white p-1 rounded-lg bg-zinc-800/80 transition"
+                >
+                  <X size={16} />
+                </button>
+              )}
+            </form>
           </div>
 
           {/* Right Floating Banner Image */}
@@ -219,34 +266,46 @@ export default function Home({ onAddToCart }) {
 
       {/* CATEGORIES PILLS */}
       <section id="catalog" className="max-w-7xl mx-auto px-6 z-10 relative">
-        <div className="flex gap-3 overflow-x-auto pb-4 no-scrollbar">
-          {categories.map((category) => (
-            <button
-              key={category}
-              onClick={() => setSelectedCategory(category)}
-              className={`px-5 py-3 rounded-full transition whitespace-nowrap text-sm font-medium ${
-                selectedCategory === category
-                  ? "bg-gradient-to-r from-violet-600 to-fuchsia-600 text-white shadow-lg shadow-violet-500/25"
-                  : "bg-zinc-900 border border-white/10 text-zinc-400 hover:border-violet-500 hover:text-white"
-              }`}
-            >
-              {category}
-            </button>
-          ))}
-        </div>
-      </section>
+  <div className="flex gap-3 overflow-x-auto pb-4 scroll-smooth snap-x snap-mandatory no-scrollbar touch-pan-x">
+    {categories.map((category) => (
+      <button
+        key={category}
+        onClick={(e) => {
+          setSelectedCategory(category);
+          // Smoothly scroll the clicked button into view
+          e.currentTarget.scrollIntoView({
+            behavior: "smooth",
+            inline: "center",
+            block: "nearest",
+          });
+        }}
+        className={`px-5 py-3 rounded-full transition-all duration-200 whitespace-nowrap text-sm font-medium snap-center shrink-0 ${
+          selectedCategory === category
+            ? "bg-gradient-to-r from-violet-600 to-fuchsia-600 text-white shadow-lg shadow-violet-500/25 scale-105"
+            : "bg-zinc-900 border border-white/10 text-zinc-400 hover:border-violet-500 hover:text-white"
+        }`}
+      >
+        {category}
+      </button>
+    ))}
+  </div>
+</section>
 
       {/* PRODUCT CATALOG HEADER */}
       <section className="max-w-7xl mx-auto px-6 mt-12 mb-8 flex justify-between items-center z-10 relative">
-        <div>
-          <h2 className="text-3xl font-bold">
-            {selectedCategory === "All" ? "Trending Products" : selectedCategory}
-          </h2>
-          <p className="text-zinc-500 mt-2">
-            {filteredProducts.length} Products Available
-          </p>
-        </div>
-      </section>
+  <div>
+    <h2 className="text-3xl font-bold">
+      {selectedCategory === "All" ? "Trending Products" : selectedCategory}
+    </h2>
+    <p className="text-zinc-500 mt-2">
+      {filteredProducts.length === 0
+        ? "No products available"
+        : filteredProducts.length === 1
+        ? "1 Product Available"
+        : `Showing ${indexOfFirstProduct + 1}–${Math.min(indexOfLastProduct, filteredProducts.length)} of ${filteredProducts.length} Products`}
+    </p>
+  </div>
+</section>
 
       {/* LOADING STATE */}
       {loading && (
@@ -267,7 +326,7 @@ export default function Home({ onAddToCart }) {
         </div>
       )}
 
-      {/* PRODUCTS GRID */}
+      {/* PRODUCTS GRID & PAGINATION */}
       {!loading && !error && (
         <section className="max-w-7xl mx-auto px-6 pb-24 z-10 relative">
           {filteredProducts.length === 0 ? (
@@ -278,16 +337,56 @@ export default function Home({ onAddToCart }) {
               </p>
             </div>
           ) : (
-            <div className="grid gap-8 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
-              {filteredProducts.map((product) => (
-                <ProductCard
-                  key={product._id}
-                  product={product}
-                  onAddToCart={onAddToCart}
-                  onDeleteProduct={handleDeleteProduct}
-                />
-              ))}
-            </div>
+            <>
+              <div className="grid gap-8 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
+                {currentProducts.map((product) => (
+                  <ProductCard
+                    key={product._id}
+                    product={product}
+                    onAddToCart={onAddToCart}
+                    onDeleteProduct={handleDeleteProduct}
+                  />
+                ))}
+              </div>
+
+              {/* PAGINATION CONTROLS */}
+              {totalPages > 1 && (
+                <div className="mt-16 flex items-center justify-center gap-3">
+                  <button
+                    onClick={() => handlePageChange(currentPage - 1)}
+                    disabled={currentPage === 1}
+                    className="p-3 rounded-2xl bg-zinc-900 border border-white/10 text-zinc-400 hover:text-white hover:border-violet-500 disabled:opacity-40 disabled:hover:border-white/10 disabled:cursor-not-allowed transition"
+                  >
+                    <ChevronLeft size={20} />
+                  </button>
+
+                  {[...Array(totalPages)].map((_, idx) => {
+                    const page = idx + 1;
+                    return (
+                      <button
+                        key={page}
+                        onClick={() => handlePageChange(page)}
+                        className={`w-11 h-11 rounded-2xl text-sm font-semibold transition ${
+                          currentPage === page
+                            ? "bg-gradient-to-r from-violet-600 to-fuchsia-600 text-white shadow-lg shadow-violet-500/25"
+                            : "bg-zinc-900 border border-white/10 text-zinc-400 hover:border-violet-500 hover:text-white"
+                        }`}
+                      >
+                        {page}
+                      </button>
+                    );
+                  })}
+
+                  <button
+                    onClick={() => handlePageChange(currentPage + 1)}
+                    disabled={currentPage === totalPages}
+                    className="p-3 rounded-2xl bg-zinc-900 border border-white/10 text-zinc-400 hover:text-white hover:border-violet-500 disabled:opacity-40 disabled:hover:border-white/10 disabled:cursor-not-allowed transition"
+                  >
+                    <ChevronRight size={20} />
+                  </button>
+                </div>
+              )}
+            </>
           )}
         </section>
       )}
@@ -397,7 +496,7 @@ export default function Home({ onAddToCart }) {
           <div className="mt-16 border-t border-white/10 pt-8 flex flex-col md:flex-row justify-between items-center text-xs text-zinc-600 gap-4">
             <div>© {new Date().getFullYear()} Velora. All rights reserved.</div>
             <div className="text-zinc-400">
-              Built  by <span className="font-semibold text-violet-400">Adeoye Rihanat</span>
+              Built by <span className="font-semibold text-violet-400">Adeoye Rihanat</span>
             </div>
           </div>
         </div>
