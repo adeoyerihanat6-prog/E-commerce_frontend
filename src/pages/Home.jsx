@@ -13,22 +13,6 @@ export default function Home({ onAddToCart }) {
   const [selectedCategory, setSelectedCategory] = useState('All');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
-  const [email, setEmail] = useState("");
-  
-  // Unified auth state with real-time window event listener
-  const [isLoggedIn, setIsLoggedIn] = useState(Boolean(localStorage.getItem("token")));
-
-  useEffect(() => {
-    const handleAuthChange = () => {
-      setIsLoggedIn(Boolean(localStorage.getItem("token")));
-    };
-
-    window.addEventListener("authChange", handleAuthChange);
-
-    return () => {
-      window.removeEventListener("authChange", handleAuthChange);
-    };
-  }, []);
 
   // Pagination State
   const [currentPage, setCurrentPage] = useState(1);
@@ -104,26 +88,6 @@ export default function Home({ onAddToCart }) {
     } catch (err) {
       toast.error(err.response?.data?.message || 'Failed to delete product');
     }
-  };
-
-  const handleSubscribe = (e) => {
-    e.preventDefault();
-    if (!email) return;
-
-    toast.success("Welcome to the community! 🎉 Check your email soon.", {
-      duration: 4000,
-      style: {
-        background: '#18181B',
-        color: '#fff',
-        border: '1px solid rgba(255, 255, 255, 0.1)',
-      },
-      iconTheme: {
-        primary: "#7C3AED",
-        secondary: "#fff",
-      },
-    });
-
-    setEmail("");
   };
 
   const handleCategoryClick = (category) => {
@@ -403,36 +367,35 @@ export default function Home({ onAddToCart }) {
         </section>
       )}
 
-      {/* NEWSLETTER BANNER - Only renders if user is NOT logged in */}
-      {!isLoggedIn && (
-        <section className="max-w-6xl mx-auto px-4 sm:px-6 pb-20 sm:pb-28 z-10 relative">
-          <div className="rounded-3xl sm:rounded-[40px] overflow-hidden bg-gradient-to-r from-violet-700 to-fuchsia-600 p-6 sm:p-12 text-center shadow-2xl shadow-violet-600/20">
-            <h2 className="text-2xl sm:text-4xl font-black text-white leading-tight">
-              Join the Velora Community
-            </h2>
-            <p className="mt-3 sm:mt-4 text-sm sm:text-base text-white/80 max-w-2xl mx-auto">
-              Get exclusive discounts, new arrivals and shopping inspiration delivered directly to your inbox.
-            </p>
-
-            <form onSubmit={handleSubscribe} className="mt-8 sm:mt-10 flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center items-center max-w-md sm:max-w-none mx-auto">
-              <input
-                type="email"
-                required
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                placeholder="Enter your email"
-                className="bg-white text-black placeholder:text-zinc-400 rounded-xl sm:rounded-2xl px-5 py-3.5 sm:px-6 sm:py-4 w-full sm:w-[380px] text-sm sm:text-base outline-none focus:ring-2 focus:ring-white/50 transition"
-              />
-              <button
-                type="submit"
-                className="w-full sm:w-auto rounded-xl sm:rounded-2xl bg-black hover:bg-zinc-900 active:scale-95 text-white px-8 py-3.5 sm:py-4 font-semibold text-sm sm:text-base transition-all duration-200 shadow-lg shrink-0"
-              >
-                Subscribe
-              </button>
-            </form>
+      {/* TRENDING SHOWCASE BANNER */}
+      <section className="max-w-6xl mx-auto px-4 sm:px-6 pb-20 sm:pb-28 z-10 relative">
+        <div className="rounded-3xl sm:rounded-[40px] overflow-hidden bg-gradient-to-r from-violet-900/60 via-zinc-900 to-fuchsia-950/60 border border-white/10 p-8 sm:p-12 text-center shadow-2xl backdrop-blur-xl">
+          <div className="inline-flex items-center gap-2 rounded-full border border-violet-500/30 bg-violet-500/10 px-4 py-1.5 text-xs text-violet-300 mb-4">
+            <Sparkles size={14} />
+            Limited Time Offer
           </div>
-        </section>
-      )}
+          <h2 className="text-2xl sm:text-4xl font-black text-white leading-tight">
+            Upgrade Your Setup Today
+          </h2>
+          <p className="mt-3 text-sm sm:text-base text-zinc-400 max-w-xl mx-auto">
+            Explore top-rated picks curated specifically to match your style. Quality guaranteed on every order.
+          </p>
+          <div className="mt-8 flex flex-wrap justify-center gap-4">
+            <button
+              onClick={() => handleCategoryClick("Electronics")}
+              className="rounded-2xl bg-gradient-to-r from-violet-600 to-fuchsia-600 hover:opacity-90 text-white px-8 py-3.5 font-semibold text-sm transition shadow-lg shadow-violet-600/25"
+            >
+              Explore Electronics
+            </button>
+            <button
+              onClick={() => handleCategoryClick("Fashion")}
+              className="rounded-2xl bg-zinc-800 hover:bg-zinc-700 border border-white/10 text-white px-8 py-3.5 font-semibold text-sm transition"
+            >
+              Explore Fashion
+            </button>
+          </div>
+        </div>
+      </section>
 
       {/* FOOTER */}
       <footer className="border-t border-white/10 bg-black relative z-10">
