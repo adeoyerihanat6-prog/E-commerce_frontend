@@ -29,12 +29,12 @@ export default function Register() {
       if (data.token) {
         localStorage.setItem('token', data.token);
         localStorage.setItem('user', JSON.stringify(data.user));
+        window.dispatchEvent(new Event("authChange"));
 
         toast.success('🎉 Welcome to Velora! Account created.');
 
         // Redirect to Home & refresh state
         navigate('/', { replace: true });
-        window.location.reload();
       } else {
         // Fallback option
         toast.success('Account created! Please log in.');

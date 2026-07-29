@@ -16,7 +16,20 @@ export default function Home({ onAddToCart }) {
   const [email, setEmail] = useState("");
 
   // Check if user is logged in
-  const token = localStorage.getItem("token");
+  // Check if user is logged in
+const [token, setToken] = useState(localStorage.getItem("token"));
+
+useEffect(() => {
+  const updateAuth = () => {
+    setToken(localStorage.getItem("token"));
+  };
+
+  window.addEventListener("authChange", updateAuth);
+
+  return () => {
+    window.removeEventListener("authChange", updateAuth);
+  };
+}, []);
 
   // Pagination State
   const [currentPage, setCurrentPage] = useState(1);
