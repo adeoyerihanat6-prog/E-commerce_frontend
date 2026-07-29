@@ -59,15 +59,15 @@ This project was built to showcase my frontend development skills, focusing on r
 
 ### Homepage
 
-![Homepage](./screenshots/home.png)
+![Homepage](./src/images/vel.png)
 
 ### Product Page
 
-![Product Page](./screenshots/product.png)
+![Product Page](./src/images/product.png)
 
 ### Cart Page
 
-![Cart Page](./screenshots/cart.png)
+![Cart Page](./src/images/cart.png)
 
 ---
 
