@@ -1,6 +1,6 @@
 # 🛍️ Velora — Modern E-commerce Platform
 
-![Velora Preview](./screenshots/banner.png)
+![Velora Preview](./src/images/vel.png)
 
 ## 🌐 Live Demo
 
