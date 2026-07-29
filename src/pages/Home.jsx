@@ -2,8 +2,9 @@ import { useEffect, useState } from 'react';
 import API from '../api/axios';
 import ProductCard from '../components/ProductCard';
 import { motion } from "framer-motion";
-import { Search, Sparkles, ArrowRight, ShieldCheck, Truck, Star } from "lucide-react";
+import { Search, Sparkles, ShieldCheck, Truck, Star } from "lucide-react";
 import { Link } from "react-router-dom";
+import toast from "react-hot-toast";
 
 export default function Home({ onAddToCart }) {
   const [products, setProducts] = useState([]);
@@ -12,6 +13,7 @@ export default function Home({ onAddToCart }) {
   const [selectedCategory, setSelectedCategory] = useState('All');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [email, setEmail] = useState("");
 
   const categories = [
     "All",
@@ -74,8 +76,39 @@ export default function Home({ onAddToCart }) {
     try {
       await API.delete(`/products/${productId}`);
       setProducts((prev) => prev.filter((p) => p._id !== productId));
+      toast.success("Product deleted successfully");
     } catch (err) {
-      alert(err.response?.data?.message || 'Failed to delete product');
+      toast.error(err.response?.data?.message || 'Failed to delete product');
+    }
+  };
+
+  const handleSubscribe = (e) => {
+    e.preventDefault();
+    if (!email) return;
+
+    // Trigger toast notification
+    toast.success("Welcome to the community! 🎉 Check your email soon.", {
+      duration: 4000,
+      style: {
+        background: '#18181B',
+        color: '#fff',
+        border: '1px solid rgba(255, 255, 255, 0.1)',
+      },
+      iconTheme: {
+        primary: "#7C3AED",
+        secondary: "#fff",
+      },
+    });
+
+    setEmail("");
+  };
+
+  const handleCategoryClick = (category) => {
+    setSelectedCategory(category);
+    // Smooth scroll down to catalog section
+    const catalogSection = document.getElementById("catalog");
+    if (catalogSection) {
+      catalogSection.scrollIntoView({ behavior: "smooth" });
     }
   };
 
@@ -260,23 +293,31 @@ export default function Home({ onAddToCart }) {
       )}
 
       {/* NEWSLETTER BANNER */}
-      <section className="max-w-6xl mx-auto px-6 pb-28 z-10 relative">
-        <div className="rounded-[40px] overflow-hidden bg-gradient-to-r from-violet-700 to-fuchsia-600 p-12 text-center shadow-2xl shadow-violet-600/20">
-          <h2 className="text-4xl font-black">Join the Velora Community</h2>
-          <p className="mt-4 text-white/80 max-w-2xl mx-auto">
+      <section className="max-w-6xl mx-auto px-4 sm:px-6 pb-20 sm:pb-28 z-10 relative">
+        <div className="rounded-3xl sm:rounded-[40px] overflow-hidden bg-gradient-to-r from-violet-700 to-fuchsia-600 p-6 sm:p-12 text-center shadow-2xl shadow-violet-600/20">
+          <h2 className="text-2xl sm:text-4xl font-black text-white leading-tight">
+            Join the Velora Community
+          </h2>
+          <p className="mt-3 sm:mt-4 text-sm sm:text-base text-white/80 max-w-2xl mx-auto">
             Get exclusive discounts, new arrivals and shopping inspiration delivered directly to your inbox.
           </p>
 
-          <div className="mt-10 flex flex-col sm:flex-row gap-4 justify-center">
+          <form onSubmit={handleSubscribe} className="mt-8 sm:mt-10 flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center items-center max-w-md sm:max-w-none mx-auto">
             <input
               type="email"
+              required
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
               placeholder="Enter your email"
-              className="bg-white text-black placeholder:text-zinc-400 rounded-2xl px-6 py-4 w-full sm:w-[380px] outline-none"
+              className="bg-white text-black placeholder:text-zinc-400 rounded-xl sm:rounded-2xl px-5 py-3.5 sm:px-6 sm:py-4 w-full sm:w-[380px] text-sm sm:text-base outline-none focus:ring-2 focus:ring-white/50 transition"
             />
-            <button className="rounded-2xl bg-black text-white px-8 py-4 font-semibold hover:bg-zinc-900 transition">
+            <button
+              type="submit"
+              className="w-full sm:w-auto rounded-xl sm:rounded-2xl bg-black hover:bg-zinc-900 active:scale-95 text-white px-8 py-3.5 sm:py-4 font-semibold text-sm sm:text-base transition-all duration-200 shadow-lg shrink-0"
+            >
               Subscribe
             </button>
-          </div>
+          </form>
         </div>
       </section>
 
@@ -294,11 +335,11 @@ export default function Home({ onAddToCart }) {
             </div>
 
             <div>
-              <h4 className="font-bold mb-4 text-white">Shop</h4>
+              <h4 className="font-bold mb-4 text-white">Categories</h4>
               <ul className="space-y-3 text-sm">
                 <li>
                   <button
-                    onClick={() => setSelectedCategory("Electronics")}
+                    onClick={() => handleCategoryClick("Electronics")}
                     className="text-zinc-500 hover:text-violet-400 transition"
                   >
                     Electronics
@@ -306,7 +347,7 @@ export default function Home({ onAddToCart }) {
                 </li>
                 <li>
                   <button
-                    onClick={() => setSelectedCategory("Fashion")}
+                    onClick={() => handleCategoryClick("Fashion")}
                     className="text-zinc-500 hover:text-violet-400 transition"
                   >
                     Fashion
@@ -314,7 +355,7 @@ export default function Home({ onAddToCart }) {
                 </li>
                 <li>
                   <button
-                    onClick={() => setSelectedCategory("Accessories")}
+                    onClick={() => handleCategoryClick("Accessories")}
                     className="text-zinc-500 hover:text-violet-400 transition"
                   >
                     Accessories
@@ -322,7 +363,7 @@ export default function Home({ onAddToCart }) {
                 </li>
                 <li>
                   <button
-                    onClick={() => setSelectedCategory("Home & Living")}
+                    onClick={() => handleCategoryClick("Home & Living")}
                     className="text-zinc-500 hover:text-violet-400 transition"
                   >
                     Home & Living
@@ -332,22 +373,32 @@ export default function Home({ onAddToCart }) {
             </div>
 
             <div>
-              <h4 className="font-bold mb-4 text-white">Company</h4>
+              <h4 className="font-bold mb-4 text-white">Quick Links</h4>
               <ul className="space-y-3 text-sm text-zinc-500">
-                <li className="hover:text-white transition cursor-pointer">About</li>
-                <li className="hover:text-white transition cursor-pointer">Support</li>
-                <li className="hover:text-white transition cursor-pointer">Privacy</li>
+                <li>
+                  <Link to="/about" className="hover:text-violet-400 transition">
+                    About Us
+                  </Link>
+                </li>
+                <li>
+                  <Link to="/shop" className="hover:text-violet-400 transition">
+                    Shop All
+                  </Link>
+                </li>
               </ul>
             </div>
 
             <div>
               <h4 className="font-bold mb-4 text-white">Contact</h4>
-              <p className="text-zinc-500 text-sm">support@velora.com</p>
+              <p className="text-zinc-500 text-sm"><a href="mailto:adeoyerihanat6@gmail.com">adeoyerihanat6@gmail.com</a></p>
             </div>
           </div>
 
-          <div className="mt-16 border-t border-white/10 pt-8 text-center text-xs text-zinc-600">
-            © {new Date().getFullYear()} Velora. All rights reserved.
+          <div className="mt-16 border-t border-white/10 pt-8 flex flex-col md:flex-row justify-between items-center text-xs text-zinc-600 gap-4">
+            <div>© {new Date().getFullYear()} Velora. All rights reserved.</div>
+            <div className="text-zinc-400">
+              Built  by <span className="font-semibold text-violet-400">Adeoye Rihanat</span>
+            </div>
           </div>
         </div>
       </footer>

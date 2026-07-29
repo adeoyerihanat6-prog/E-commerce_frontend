@@ -1,10 +1,13 @@
 import React, { useState } from 'react';
 import API from '../api/axios';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, ShoppingBag, Plus, Minus, Trash2, ArrowRight, Loader2 } from 'lucide-react';
+import { X, ShoppingBag, Plus, Minus, Trash2, ArrowRight, Loader2, LogIn } from 'lucide-react';
+import { useNavigate } from "react-router-dom";
 
 export default function CartDrawer({ isOpen, onClose, cart = [], setCart }) {
   const [loading, setLoading] = useState(false);
+  const navigate = useNavigate();
+  const token = localStorage.getItem("token");
 
   if (!isOpen) return null;
 
@@ -31,6 +34,15 @@ export default function CartDrawer({ isOpen, onClose, cart = [], setCart }) {
   const handleCheckout = async () => {
     if (cart.length === 0) return;
 
+    // 🔴 1. CHECK IF USER IS LOGGED IN
+    if (!token) {
+      onClose(); // Close cart modal
+      // Redirect to login and save current path so login can send them back
+      navigate("/login", { state: { redirectTo: "/" } });
+      return;
+    }
+
+    // 🟢 2. IF LOGGED IN, PROCESS ORDER
     setLoading(true);
 
     try {
@@ -47,7 +59,7 @@ export default function CartDrawer({ isOpen, onClose, cart = [], setCart }) {
       setCart([]);
       onClose();
     } catch (err) {
-      alert(err.response?.data?.message || 'Failed to place order. Make sure you are logged in!');
+      alert(err.response?.data?.message || 'Failed to place order. Please try again!');
     } finally {
       setLoading(false);
     }
@@ -73,7 +85,7 @@ export default function CartDrawer({ isOpen, onClose, cart = [], setCart }) {
           transition={{ type: 'spring', damping: 25, stiffness: 200 }}
           className="w-screen max-w-md bg-[#09090B] border-l border-white/10 text-white shadow-2xl flex flex-col relative"
         >
-          {/* Subtle Glow inside drawer */}
+          {/* Glow effect */}
           <div className="absolute w-72 h-72 bg-violet-600/10 blur-[120px] rounded-full top-0 right-0 pointer-events-none" />
 
           {/* Header */}
@@ -121,21 +133,18 @@ export default function CartDrawer({ isOpen, onClose, cart = [], setCart }) {
                     exit={{ opacity: 0, scale: 0.95 }}
                     className="flex gap-4 p-3.5 bg-zinc-900/80 rounded-2xl border border-white/10 items-center relative group"
                   >
-                    {/* Item Image */}
                     <img
                       src={item.image}
                       alt={item.name}
                       className="w-16 h-16 object-cover rounded-xl border border-white/5 bg-zinc-800"
                     />
 
-                    {/* Details */}
                     <div className="flex-1 min-w-0">
                       <h4 className="text-sm font-semibold text-white truncate">{item.name}</h4>
                       <p className="text-xs font-bold bg-gradient-to-r from-violet-400 to-fuchsia-400 bg-clip-text text-transparent mt-0.5">
                         ${item.price}
                       </p>
 
-                      {/* Quantity Control */}
                       <div className="flex items-center gap-3 mt-3">
                         <div className="flex items-center gap-2 rounded-lg bg-zinc-800 border border-white/10 p-1">
                           <button
@@ -157,7 +166,6 @@ export default function CartDrawer({ isOpen, onClose, cart = [], setCart }) {
                           </button>
                         </div>
 
-                        {/* Trash Action */}
                         <button
                           onClick={() => removeItem(item._id)}
                           className="p-1.5 text-zinc-500 hover:text-red-400 transition"
@@ -193,6 +201,14 @@ export default function CartDrawer({ isOpen, onClose, cart = [], setCart }) {
                 </div>
               </div>
 
+              {/* Guest Banner Notice */}
+              {!token && (
+                <p className="text-xs text-center text-violet-300 bg-violet-500/10 border border-violet-500/20 py-2 px-3 rounded-xl">
+                  🔒 You will need to sign in to place this order
+                </p>
+              )}
+
+              {/* Dynamic Button Action */}
               <button
                 onClick={handleCheckout}
                 disabled={loading}
@@ -203,10 +219,15 @@ export default function CartDrawer({ isOpen, onClose, cart = [], setCart }) {
                     <Loader2 size={18} className="animate-spin" />
                     <span>Processing Order...</span>
                   </>
-                ) : (
+                ) : token ? (
                   <>
                     <span>Checkout Now</span>
                     <ArrowRight size={18} />
+                  </>
+                ) : (
+                  <>
+                    <LogIn size={18} />
+                    <span>Sign In to Checkout</span>
                   </>
                 )}
               </button>

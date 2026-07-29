@@ -1,9 +1,11 @@
 import { useState, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { Toaster } from 'react-hot-toast';
 
 // Components
 import Navbar from './components/Navbar';
 import CartDrawer from './components/CartDrawer';
+import { MobileGuestBar } from './components/MobileGuestBar';
 
 // Pages
 import Home from './pages/Home';
@@ -14,8 +16,6 @@ import AdminDashboard from './pages/AdminDashboard';
 import Profile from './pages/Profile';
 import Shop from './pages/Shop';
 import About from './pages/About';
-
-// Inside your <Routes>:
 
 // Protected Route Helper for Admins
 const AdminRoute = ({ children }) => {
@@ -60,7 +60,17 @@ export default function App() {
   return (
     <Router>
       <div className="min-h-screen bg-[#09090B] text-white flex flex-col relative selection:bg-violet-500 selection:text-white">
-        
+        {/* Toast Container */}
+      <Toaster 
+        position="top-right" 
+        toastOptions={{
+          style: {
+            background: '#18181B',
+            color: '#fff',
+            border: '1px solid rgba(255, 255, 255, 0.1)',
+          },
+        }} 
+      />
         {/* Global Subtle Ambient Glows */}
         <div className="fixed top-0 left-1/4 w-96 h-96 bg-violet-600/10 blur-[160px] rounded-full pointer-events-none z-0" />
         <div className="fixed bottom-0 right-1/4 w-96 h-96 bg-fuchsia-600/10 blur-[160px] rounded-full pointer-events-none z-0" />
@@ -71,8 +81,11 @@ export default function App() {
           onOpenCart={() => setIsCartOpen(true)} 
         />
 
+        {/* Floating Mobile Sign Up Bar (Only renders for guests on mobile) */}
+        <MobileGuestBar />
+
         {/* Page Routes */}
-        <main className="flex-grow relative z-10">
+        <main className="flex-grow relative z-10 pt-20">
           <Routes>
             <Route path="/" element={<Home onAddToCart={handleAddToCart} />} />
             <Route path="/login" element={<Login />} />
@@ -105,8 +118,8 @@ export default function App() {
               } 
             />
             <Route path="/shop" element={<Shop onAddToCart={handleAddToCart} />} />
-          <Route path="/collections" element={<Shop onAddToCart={handleAddToCart} />} />
-          <Route path="/about" element={<About />} />
+            <Route path="/collections" element={<Shop onAddToCart={handleAddToCart} />} />
+            <Route path="/about" element={<About />} />
 
             {/* Fallback Catch-All */}
             <Route path="*" element={<Navigate to="/" replace />} />
