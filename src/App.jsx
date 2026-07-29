@@ -31,6 +31,18 @@ const ProtectedRoute = ({ children }) => {
 };
 
 export default function App() {
+  // Centralized Auth State
+  const [isLoggedIn, setIsLoggedIn] = useState(Boolean(localStorage.getItem("token")));
+
+  useEffect(() => {
+    const handleAuthChange = () => {
+      setIsLoggedIn(Boolean(localStorage.getItem("token")));
+    };
+
+    window.addEventListener("authChange", handleAuthChange);
+    return () => window.removeEventListener("authChange", handleAuthChange);
+  }, []);
+
   // Initialize cart from localStorage if available
   const [cart, setCart] = useState(() => {
     const savedCart = localStorage.getItem('velora_cart');
@@ -84,13 +96,13 @@ export default function App() {
           onOpenCart={() => setIsCartOpen(true)} 
         />
 
-        {/* Floating Mobile Sign Up Bar (Only renders for guests on mobile) */}
-        <MobileGuestBar />
+        {/* Floating Mobile Sign Up Bar (Only renders for guests) */}
+        {!isLoggedIn && <MobileGuestBar />}
 
         {/* Page Routes */}
         <main className="flex-grow relative z-10 pt-20">
           <Routes>
-            <Route path="/" element={<Home onAddToCart={handleAddToCart} />} />
+            <Route path="/" element={<Home onAddToCart={handleAddToCart} isLoggedIn={isLoggedIn} />} />
             <Route path="/shop" element={<Shop onAddToCart={handleAddToCart} />} />
             <Route path="/collections" element={<Shop onAddToCart={handleAddToCart} />} />
             <Route path="/product/:id" element={<ProductDetails onAddToCart={handleAddToCart} />} />

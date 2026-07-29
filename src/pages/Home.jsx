@@ -6,7 +6,7 @@ import { Search, Sparkles, ShieldCheck, Truck, Star, ChevronLeft, ChevronRight, 
 import { Link } from "react-router-dom";
 import toast from "react-hot-toast";
 
-export default function Home({ onAddToCart }) {
+export default function Home({ onAddToCart, isLoggedIn}) {
   const [products, setProducts] = useState([]);
   const [filteredProducts, setFilteredProducts] = useState([]);
   const [searchQuery, setSearchQuery] = useState('');
