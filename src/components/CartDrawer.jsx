@@ -7,9 +7,11 @@ import { useNavigate } from "react-router-dom";
 export default function CartDrawer({ isOpen, onClose, cart = [], setCart }) {
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
-  const token = localStorage.getItem("token");
 
   if (!isOpen) return null;
+
+  // Dynamically check token on render so it's always up-to-date
+  const token = localStorage.getItem("token");
 
   const totalAmount = cart.reduce((acc, item) => acc + item.price * item.quantity, 0);
 
@@ -34,15 +36,15 @@ export default function CartDrawer({ isOpen, onClose, cart = [], setCart }) {
   const handleCheckout = async () => {
     if (cart.length === 0) return;
 
-    // 🔴 1. CHECK IF USER IS LOGGED IN
+    // 1. CHECK IF USER IS LOGGED IN
     if (!token) {
       onClose(); // Close cart modal
-      // Redirect to login and save current path so login can send them back
+      // Redirect to login and save current path
       navigate("/login", { state: { redirectTo: "/" } });
       return;
     }
 
-    // 🟢 2. IF LOGGED IN, PROCESS ORDER
+    // 2. IF LOGGED IN, PROCESS ORDER
     setLoading(true);
 
     try {

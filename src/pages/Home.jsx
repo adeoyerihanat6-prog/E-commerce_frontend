@@ -15,9 +15,12 @@ export default function Home({ onAddToCart }) {
   const [error, setError] = useState('');
   const [email, setEmail] = useState("");
 
+  // Check if user is logged in
+  const token = localStorage.getItem("token");
+
   // Pagination State
   const [currentPage, setCurrentPage] = useState(1);
-  const productsPerPage = 8; // Adjust max products per page as needed
+  const productsPerPage = 8;
 
   const categories = [
     "All",
@@ -64,7 +67,7 @@ export default function Home({ onAddToCart }) {
       );
     }
 
-    // Filter by search query (safe check for missing properties)
+    // Filter by search query
     if (searchQuery.trim() !== '') {
       const query = searchQuery.toLowerCase().trim();
       updated = updated.filter((p) => {
@@ -75,7 +78,7 @@ export default function Home({ onAddToCart }) {
     }
 
     setFilteredProducts(updated);
-    setCurrentPage(1); // Reset back to page 1 whenever search/category changes
+    setCurrentPage(1);
   }, [searchQuery, selectedCategory, products]);
 
   // Handle Admin Delete Action
@@ -122,10 +125,8 @@ export default function Home({ onAddToCart }) {
   // Mobile/Enter submission handler
   const handleSearchSubmit = (e) => {
     e.preventDefault();
-    // Dismiss mobile soft keyboard
     document.activeElement?.blur();
 
-    // Scroll to results section
     const catalogSection = document.getElementById("catalog");
     if (catalogSection) {
       catalogSection.scrollIntoView({ behavior: "smooth" });
@@ -266,46 +267,45 @@ export default function Home({ onAddToCart }) {
 
       {/* CATEGORIES PILLS */}
       <section id="catalog" className="max-w-7xl mx-auto px-6 z-10 relative">
-  <div className="flex gap-3 overflow-x-auto pb-4 scroll-smooth snap-x snap-mandatory no-scrollbar touch-pan-x">
-    {categories.map((category) => (
-      <button
-        key={category}
-        onClick={(e) => {
-          setSelectedCategory(category);
-          // Smoothly scroll the clicked button into view
-          e.currentTarget.scrollIntoView({
-            behavior: "smooth",
-            inline: "center",
-            block: "nearest",
-          });
-        }}
-        className={`px-5 py-3 rounded-full transition-all duration-200 whitespace-nowrap text-sm font-medium snap-center shrink-0 ${
-          selectedCategory === category
-            ? "bg-gradient-to-r from-violet-600 to-fuchsia-600 text-white shadow-lg shadow-violet-500/25 scale-105"
-            : "bg-zinc-900 border border-white/10 text-zinc-400 hover:border-violet-500 hover:text-white"
-        }`}
-      >
-        {category}
-      </button>
-    ))}
-  </div>
-</section>
+        <div className="flex gap-3 overflow-x-auto pb-4 scroll-smooth snap-x snap-mandatory no-scrollbar touch-pan-x">
+          {categories.map((category) => (
+            <button
+              key={category}
+              onClick={(e) => {
+                setSelectedCategory(category);
+                e.currentTarget.scrollIntoView({
+                  behavior: "smooth",
+                  inline: "center",
+                  block: "nearest",
+                });
+              }}
+              className={`px-5 py-3 rounded-full transition-all duration-200 whitespace-nowrap text-sm font-medium snap-center shrink-0 ${
+                selectedCategory === category
+                  ? "bg-gradient-to-r from-violet-600 to-fuchsia-600 text-white shadow-lg shadow-violet-500/25 scale-105"
+                  : "bg-zinc-900 border border-white/10 text-zinc-400 hover:border-violet-500 hover:text-white"
+              }`}
+            >
+              {category}
+            </button>
+          ))}
+        </div>
+      </section>
 
       {/* PRODUCT CATALOG HEADER */}
       <section className="max-w-7xl mx-auto px-6 mt-12 mb-8 flex justify-between items-center z-10 relative">
-  <div>
-    <h2 className="text-3xl font-bold">
-      {selectedCategory === "All" ? "Trending Products" : selectedCategory}
-    </h2>
-    <p className="text-zinc-500 mt-2">
-      {filteredProducts.length === 0
-        ? "No products available"
-        : filteredProducts.length === 1
-        ? "1 Product Available"
-        : `Showing ${indexOfFirstProduct + 1}–${Math.min(indexOfLastProduct, filteredProducts.length)} of ${filteredProducts.length} Products`}
-    </p>
-  </div>
-</section>
+        <div>
+          <h2 className="text-3xl font-bold">
+            {selectedCategory === "All" ? "Trending Products" : selectedCategory}
+          </h2>
+          <p className="text-zinc-500 mt-2">
+            {filteredProducts.length === 0
+              ? "No products available"
+              : filteredProducts.length === 1
+              ? "1 Product Available"
+              : `Showing ${indexOfFirstProduct + 1}–${Math.min(indexOfLastProduct, filteredProducts.length)} of ${filteredProducts.length} Products`}
+          </p>
+        </div>
+      </section>
 
       {/* LOADING STATE */}
       {loading && (
@@ -391,34 +391,36 @@ export default function Home({ onAddToCart }) {
         </section>
       )}
 
-      {/* NEWSLETTER BANNER */}
-      <section className="max-w-6xl mx-auto px-4 sm:px-6 pb-20 sm:pb-28 z-10 relative">
-        <div className="rounded-3xl sm:rounded-[40px] overflow-hidden bg-gradient-to-r from-violet-700 to-fuchsia-600 p-6 sm:p-12 text-center shadow-2xl shadow-violet-600/20">
-          <h2 className="text-2xl sm:text-4xl font-black text-white leading-tight">
-            Join the Velora Community
-          </h2>
-          <p className="mt-3 sm:mt-4 text-sm sm:text-base text-white/80 max-w-2xl mx-auto">
-            Get exclusive discounts, new arrivals and shopping inspiration delivered directly to your inbox.
-          </p>
+      {/* NEWSLETTER BANNER - Only renders if user is NOT logged in */}
+      {!token && (
+        <section className="max-w-6xl mx-auto px-4 sm:px-6 pb-20 sm:pb-28 z-10 relative">
+          <div className="rounded-3xl sm:rounded-[40px] overflow-hidden bg-gradient-to-r from-violet-700 to-fuchsia-600 p-6 sm:p-12 text-center shadow-2xl shadow-violet-600/20">
+            <h2 className="text-2xl sm:text-4xl font-black text-white leading-tight">
+              Join the Velora Community
+            </h2>
+            <p className="mt-3 sm:mt-4 text-sm sm:text-base text-white/80 max-w-2xl mx-auto">
+              Get exclusive discounts, new arrivals and shopping inspiration delivered directly to your inbox.
+            </p>
 
-          <form onSubmit={handleSubscribe} className="mt-8 sm:mt-10 flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center items-center max-w-md sm:max-w-none mx-auto">
-            <input
-              type="email"
-              required
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              placeholder="Enter your email"
-              className="bg-white text-black placeholder:text-zinc-400 rounded-xl sm:rounded-2xl px-5 py-3.5 sm:px-6 sm:py-4 w-full sm:w-[380px] text-sm sm:text-base outline-none focus:ring-2 focus:ring-white/50 transition"
-            />
-            <button
-              type="submit"
-              className="w-full sm:w-auto rounded-xl sm:rounded-2xl bg-black hover:bg-zinc-900 active:scale-95 text-white px-8 py-3.5 sm:py-4 font-semibold text-sm sm:text-base transition-all duration-200 shadow-lg shrink-0"
-            >
-              Subscribe
-            </button>
-          </form>
-        </div>
-      </section>
+            <form onSubmit={handleSubscribe} className="mt-8 sm:mt-10 flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center items-center max-w-md sm:max-w-none mx-auto">
+              <input
+                type="email"
+                required
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder="Enter your email"
+                className="bg-white text-black placeholder:text-zinc-400 rounded-xl sm:rounded-2xl px-5 py-3.5 sm:px-6 sm:py-4 w-full sm:w-[380px] text-sm sm:text-base outline-none focus:ring-2 focus:ring-white/50 transition"
+              />
+              <button
+                type="submit"
+                className="w-full sm:w-auto rounded-xl sm:rounded-2xl bg-black hover:bg-zinc-900 active:scale-95 text-white px-8 py-3.5 sm:py-4 font-semibold text-sm sm:text-base transition-all duration-200 shadow-lg shrink-0"
+              >
+                Subscribe
+              </button>
+            </form>
+          </div>
+        </section>
+      )}
 
       {/* FOOTER */}
       <footer className="border-t border-white/10 bg-black relative z-10">

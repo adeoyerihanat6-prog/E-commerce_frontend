@@ -3,6 +3,7 @@ import { useNavigate, Link } from 'react-router-dom';
 import API from '../api/axios';
 import { motion } from 'framer-motion';
 import { User, Mail, Phone, Lock, UserPlus, Sparkles, Eye, EyeOff, Loader2 } from 'lucide-react';
+import toast from 'react-hot-toast';
 
 export default function Register() {
   const [formData, setFormData] = useState({ name: '', email: '', password: '', contact: '' });
@@ -21,8 +22,24 @@ export default function Register() {
     setError('');
 
     try {
-      await API.post('/users/register', formData);
-      navigate('/login');
+      // 1. Submit registration data to backend
+      const { data } = await API.post('/users/register', formData);
+
+      // 2. Automatically log the user in if the token is returned
+      if (data.token) {
+        localStorage.setItem('token', data.token);
+        localStorage.setItem('user', JSON.stringify(data.user));
+
+        toast.success('🎉 Welcome to Velora! Account created.');
+
+        // Redirect to Home & refresh state
+        navigate('/', { replace: true });
+        window.location.reload();
+      } else {
+        // Fallback option
+        toast.success('Account created! Please log in.');
+        navigate('/login');
+      }
     } catch (err) {
       setError(err.response?.data?.message || 'Registration failed');
     } finally {
