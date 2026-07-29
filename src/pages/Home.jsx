@@ -14,6 +14,9 @@ export default function Home({ onAddToCart }) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [email, setEmail] = useState("");
+  const [isLoggedIn, setIsLoggedIn] = useState(
+  Boolean(localStorage.getItem("token"))
+);
 
   // Check if user is logged in
   // Check if user is logged in
@@ -28,6 +31,18 @@ useEffect(() => {
 
   return () => {
     window.removeEventListener("authChange", updateAuth);
+  };
+}, []);
+
+useEffect(() => {
+  const checkAuth = () => {
+    setIsLoggedIn(Boolean(localStorage.getItem("token")));
+  };
+
+  window.addEventListener("authChange", checkAuth);
+
+  return () => {
+    window.removeEventListener("authChange", checkAuth);
   };
 }, []);
 
@@ -405,8 +420,8 @@ useEffect(() => {
       )}
 
       {/* NEWSLETTER BANNER - Only renders if user is NOT logged in */}
-      {!token && (
-        <section className="max-w-6xl mx-auto px-4 sm:px-6 pb-20 sm:pb-28 z-10 relative">
+      {!isLoggedIn && (
+     <section className="max-w-6xl mx-auto px-4 sm:px-6 pb-20 sm:pb-28 z-10 relative">
           <div className="rounded-3xl sm:rounded-[40px] overflow-hidden bg-gradient-to-r from-violet-700 to-fuchsia-600 p-6 sm:p-12 text-center shadow-2xl shadow-violet-600/20">
             <h2 className="text-2xl sm:text-4xl font-black text-white leading-tight">
               Join the Velora Community
