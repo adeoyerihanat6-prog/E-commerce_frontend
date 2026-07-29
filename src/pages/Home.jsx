@@ -6,27 +6,13 @@ import { Search, Sparkles, ShieldCheck, Truck, Star, ChevronLeft, ChevronRight, 
 import { Link } from "react-router-dom";
 import toast from "react-hot-toast";
 
-export default function Home({ onAddToCart, isLoggedIn}) {
+export default function Home({ onAddToCart, isLoggedIn }) {
   const [products, setProducts] = useState([]);
   const [filteredProducts, setFilteredProducts] = useState([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('All');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
-  
-  // Real-time auth state tracker
-  const [isLoggedIn, setIsLoggedIn] = useState(Boolean(localStorage.getItem("token")));
-
-  useEffect(() => {
-    const handleAuthChange = () => {
-      setIsLoggedIn(Boolean(localStorage.getItem("token")));
-    };
-
-    window.addEventListener("authChange", handleAuthChange);
-    return () => {
-      window.removeEventListener("authChange", handleAuthChange);
-    };
-  }, []);
 
   // Pagination State
   const [currentPage, setCurrentPage] = useState(1);
